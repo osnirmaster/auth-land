@@ -1,0 +1,28 @@
+server:
+    port: 9090
+
+spring:
+  security:
+    oauth2:
+      client:
+        provider:
+          keycloak:
+            issuer-uri: http://localhost:8083/auth/realms/bank
+        registration:
+          keycloak:
+            client-id: amazing-bank
+            client-secret: ueNtJdmVpEBeEp40z4J0qNN8Q6CO0PfP
+            scope:
+              - openid
+              - profile
+              - email
+      resourceserver:
+        jwt:
+          issuer-uri: http://localhost:8083/auth/realms/bank
+  datasource:
+    url: jdbc:h2:mem:customerdb
+    username: sa
+  h2:
+    console:
+      enabled: true
+      path: /h2
