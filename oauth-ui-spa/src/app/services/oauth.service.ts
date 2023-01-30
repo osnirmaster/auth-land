@@ -1,7 +1,8 @@
 import {Injectable} from '@angular/core';
 import { Cookie } from 'ng2-cookies';
-import { HttpClient, HttpHeaders } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { HttpClient, HttpHeaders, HttpErrorResponse } from '@angular/common/http';
+import { Observable, throwError } from 'rxjs';
+import { catchError, retry } from 'rxjs/operators';
 import 'rxjs/add/operator/catch';
 import 'rxjs/add/operator/map';
 
@@ -46,8 +47,7 @@ export class OauthService {
 
   getResource(resourceUrl: string) : Observable<any>{
     var headers = new HttpHeaders({'Content-type': 'application/x-www-form-urlencoded; charset=utf-8', 'Authorization': 'Bearer '+Cookie.get('access_token')});
-    return this._http.get(resourceUrl, { headers: headers }).
-                   .catch((error:any) => Observable.throw(error.json().error || 'Server error'));
+    return this._http.get(resourceUrl, { headers: headers }).pipe(catchError(this.handleError));
   }
 
   checkCredentials(){
@@ -63,6 +63,20 @@ export class OauthService {
       + "&post_logout_redirect_uri=" + this.redirectUri;
 
     window.location.href = logoutURL;
+  }
+
+  private handleError(error: HttpErrorResponse) {
+    if (error.status === 0) {
+      // A client-side or network error occurred. Handle it accordingly.
+      console.error('An error occurred:', error.error);
+    } else {
+      // The backend returned an unsuccessful response code.
+      // The response body may contain clues as to what went wrong.
+      console.error(
+        `Backend returned code ${error.status}, body was: `, error.error);
+    }
+    // Return an observable with a user-facing error message.
+    return throwError(() => new Error('Something bad happened; please try again later.'));
   }
 }
 
